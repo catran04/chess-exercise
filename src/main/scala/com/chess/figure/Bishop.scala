@@ -13,5 +13,5 @@ class Bishop(placeHorizontal: Int, placeVertical: Int) extends ChessShape{
 }
 
 object Bishop {
-  def apply(): Bishop = new Bishop()
+  def apply(placeHorizontal: Int, placeVertical: Int): Bishop = new Bishop(placeHorizontal, placeVertical)
 }

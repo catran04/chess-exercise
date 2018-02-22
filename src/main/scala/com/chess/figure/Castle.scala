@@ -15,5 +15,5 @@ class Castle(placeHorizontal: Int, placeVertical: Int) extends ChessShape {
 }
 
 object Castle {
-  def apply(): Castle = new Castle()
+  def apply(placeHorizontal: Int, placeVertical: Int): Castle = new Castle(placeHorizontal, placeVertical)
 }

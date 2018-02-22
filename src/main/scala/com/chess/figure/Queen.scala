@@ -1,21 +1,25 @@
 package com.chess.figure
 
 import scala.collection.mutable
+import scala.math.abs
 
 /**
   * Created by Administrator on 2/20/2018.
   */
-class Queen extends ChessShape {
+class Queen(placeHorizontal: Int, placeVertical: Int) extends ChessShape {
 
-  def place(horizontal: Int, vertical: Int, chessField: Array[Array[Int]]): Array[Array[Int]] = {
-    for (i <- chessField.indices) {
-      for (j <- chessField(i).indices) {
-        Array[Array[Int]]
-      }
+
+  override def brokenField(horizontal: Int, vertical: Int): Boolean = {
+    val bishopBrokes: Boolean = abs(placeHorizontal - horizontal) == abs(placeVertical - vertical)
+    val castleBrokes: Boolean = {
+      val coincidenceRaw: Boolean = placeHorizontal == horizontal
+      val coincidenceColumn: Boolean = placeVertical == vertical
+      coincidenceRaw || coincidenceColumn
     }
+    bishopBrokes || castleBrokes
   }
 }
 
 object Queen {
-  def apply(): Queen = new Queen()
+  def apply(placeHorizontal: Int, placeVertical: Int): Queen = new Queen(placeHorizontal, placeVertical)
 }

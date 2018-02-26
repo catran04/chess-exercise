@@ -13,8 +13,8 @@ object ThreadBuilder {
     if(setFigures.isEmpty) throw new RuntimeException("setFiguresIsEmpty")
     val sortedCollectionFigures = setFigures.sortBy(figure => figure.priority)
     var count: Int = 0
-    new Thread() {
-      override def run(): Unit = {
+//    new Thread() {
+//      override def run(): Unit = {
         setFigures(0).placeHorizontal = horizontal
         setFigures(0).placeVertical = vertical
 
@@ -28,35 +28,39 @@ object ThreadBuilder {
             for(vert <- sortedCollectionFigures(numberFigures).placeVertical to chessField._2) {
               sortedCollectionFigures(numberFigures).placeHorizontal = hor
               sortedCollectionFigures(numberFigures).placeVertical = vert
-              if(!isBrokenPlace(sortedCollectionFigures.take(numberFigures - 1), sortedCollectionFigures(numberFigures))) {
+              if(!isBrokenPlace(sortedCollectionFigures.take(numberFigures), sortedCollectionFigures(numberFigures), hor, vert)) {
                 if(numberFigures + 1 == sortedCollectionFigures.length) {
                   count += 1
                 }else {
+                  sortedCollectionFigures(numberFigures).placeHorizontal = hor
+                  sortedCollectionFigures(numberFigures).placeVertical = vert
                   abcd(sortedCollectionFigures, chessField, numberFigures + 1)
                 }
                 if(hor == chessField._1 && vert == chessField._2) {
-                  if(numberFigures - 1 == sortedCollectionFigures(numberFigures)) {
+                  if(numberFigures == 1) {
                     return
                   }
 //                  usedFigures += sortedCollectionFigures(numberFigures)
-                  if(numberFigures != 0) {
                     abcd(sortedCollectionFigures, chessField, numberFigures - 1)
-                  }
                 }
               }
               if(hor == chessField._1 && vert == chessField._2) {
                 if(numberFigures + 1 == sortedCollectionFigures.length) {
-//                  usedFigures = usedFigures.dropRight(1)
+                  if(numberFigures == 1) return
                   abcd(sortedCollectionFigures, chessField, numberFigures - 1)
                 }
+                sortedCollectionFigures(numberFigures).placeHorizontal = hor
+                sortedCollectionFigures(numberFigures).placeVertical = vert
                 abcd(sortedCollectionFigures, chessField, numberFigures + 1)
               }
+              sortedCollectionFigures(numberFigures).placeHorizontal = 1
+              sortedCollectionFigures(numberFigures).placeVertical = 1
             }
           }
+          println(s"COUNT ${count}")
         }
-      }
-    }.start()
-    println(s"COUNT ${count}")
+//      }
+//    }.start()
     count
   }
 
@@ -68,7 +72,7 @@ object ThreadBuilder {
     * @param currentFigure: ChessShape - The current figure
     * @return Boolean- returns true if at least one figure brokes other figure
     */
-  private def isBrokenPlace(usedFigures: Array[ChessShape], currentFigure: ChessShape): Boolean = {
+  private def isBrokenPlace(usedFigures: Array[ChessShape], currentFigure: ChessShape, hor: Int, vert: Int): Boolean = {
     for(i <- usedFigures.indices) {
       if(usedFigures(i).brokenField(currentFigure.placeHorizontal, currentFigure.placeVertical) ||
       currentFigure.brokenField(usedFigures(i).placeHorizontal, usedFigures(i).placeVertical)) return true

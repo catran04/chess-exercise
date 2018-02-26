@@ -17,10 +17,6 @@ object ThreadBuilder {
 //      override def run(): Unit = {
         sortedCollectionFigures(0).horizontal = horizontal
         sortedCollectionFigures(0).vertical = vertical
-    println(s"set ${sortedCollectionFigures(0).vertical = vertical}")
-
-
-//        var usedFigures: mutable.MutableList[ChessShape] = mutable.MutableList[ChessShape](setFigures(0))
 
         abcd(sortedCollectionFigures, chessField, 1)
 

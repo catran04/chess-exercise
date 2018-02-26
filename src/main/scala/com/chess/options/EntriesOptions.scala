@@ -8,7 +8,7 @@ import com.chess.figure.ChessShape
 case class EntriesOptions(
                            width: Int,
                            height: Int,
-                           shapes: Map[ChessShape, Int]
+                           shapes: List[ChessShape]
                          ) {
 
 }

@@ -5,13 +5,15 @@ import scala.math.abs
 /**
   * Created by Administrator on 2/20/2018.
   */
-class Bishop(placeHorizontal: Int, placeVertical: Int) extends ChessShape{
+class Bishop extends ChessShape{
 
-  override def brokenField(horizontal: Int, vertical: Int): Boolean = {
-    abs(placeHorizontal - horizontal) == abs(placeVertical - vertical)
+  override val priority = 3
+
+  override def brokenField(horizontal: Int, vertical: Int, otherHorizontal: Int, otherVertical: Int): Boolean = {
+    abs(horizontal - otherHorizontal) == abs(vertical - otherVertical)
   }
 }
 
 object Bishop {
-  def apply(placeHorizontal: Int, placeVertical: Int): Bishop = new Bishop(placeHorizontal, placeVertical)
+  def apply(): Bishop = new Bishop()
 }

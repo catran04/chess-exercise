@@ -6,14 +6,15 @@ import scala.math.abs
 /**
   * Created by Administrator on 2/20/2018.
   */
-class Queen(placeHorizontal: Int, placeVertical: Int) extends ChessShape {
+class Queen extends ChessShape {
 
+  override val priority = 1
 
-  override def brokenField(horizontal: Int, vertical: Int): Boolean = {
-    val bishopBrokes: Boolean = abs(placeHorizontal - horizontal) == abs(placeVertical - vertical)
+  override def brokenField(horizontal: Int, vertical: Int, otherHorizontal: Int, otherVertical: Int): Boolean = {
+    val bishopBrokes: Boolean = abs(horizontal - otherHorizontal) == abs(vertical - otherVertical)
     val castleBrokes: Boolean = {
-      val coincidenceRaw: Boolean = placeHorizontal == horizontal
-      val coincidenceColumn: Boolean = placeVertical == vertical
+      val coincidenceRaw: Boolean = horizontal == otherHorizontal
+      val coincidenceColumn: Boolean = vertical == otherVertical
       coincidenceRaw || coincidenceColumn
     }
     bishopBrokes || castleBrokes
@@ -21,5 +22,5 @@ class Queen(placeHorizontal: Int, placeVertical: Int) extends ChessShape {
 }
 
 object Queen {
-  def apply(placeHorizontal: Int, placeVertical: Int): Queen = new Queen(placeHorizontal, placeVertical)
+  def apply(): Queen = new Queen
 }

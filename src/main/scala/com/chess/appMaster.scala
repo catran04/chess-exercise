@@ -17,6 +17,9 @@ object appMaster {
   def main(args: Array[String]): Unit = {
     try {
       val parameters = validateParseArgs(args)
+      println(s"parameters ${parameters}")
+      val count = ThreadBuilder.createWorker(1, 1, parameters.shapes.toArray, (parameters.width, parameters.height))
+      println(s"count ${count}")
 
     } catch {
       case cope: ChessOptionParseException => {
@@ -38,11 +41,12 @@ object appMaster {
     if(args.isEmpty) throw new EmptyArgsException("args is empty")
 
     val wight: Int = tryToInt(args(0))
-    val height: Int = tryToInt(args(0))
+    val height: Int = tryToInt(args(1))
 
 
 
-    var chessSet: mutable.Map[ChessShape, Int] = mutable.Map()
+    var chessSet: mutable.MutableList[ChessShape] = mutable.MutableList[ChessShape]()
+    var setPairs: mutable.MutableList[(ChessShape, Int)] = mutable.MutableList[(ChessShape, Int)]()
 
     for(i <- 2 until args.length) {
       i % 2 == 0 match {
@@ -51,14 +55,26 @@ object appMaster {
         }
         case false => {
           number = args(i).toInt
+          val pair: (ChessShape, Int) = (shape, number)
+          setPairs += pair
         }
       }
-      val pair = (shape, number)
-      chessSet += pair
     }
+    val listSameFigures = setPairs.flatMap(pair => createFigures(pair._1, pair._2))
+    println(s"listSameFigures ${listSameFigures}")
+    chessSet ++= listSameFigures
+    println(s"chessSet ${chessSet.length}")
 
 
-    EntriesOptions(wight, height, chessSet.toMap)
+    EntriesOptions(wight, height, chessSet.toList)
+  }
+
+  def createFigures(figure: ChessShape, number: Int): mutable.MutableList[ChessShape] = {
+    var setSameFigures: mutable.MutableList[ChessShape] = mutable.MutableList[ChessShape]()
+    for(i <- 0 until number) {
+      setSameFigures += figure
+    }
+    setSameFigures
   }
 
   def tryToInt(elem: String): Int = {

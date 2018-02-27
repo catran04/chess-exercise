@@ -84,6 +84,5 @@ object appMaster {
       case cce: ClassCastException => throw new ClassCastException(s"element of args: '${elem}' should be 'Int'")
       case nfe: NumberFormatException => throw new NumberFormatException(s"element of args: '${elem}' should be 'Int'")
     }
-
   }
 }

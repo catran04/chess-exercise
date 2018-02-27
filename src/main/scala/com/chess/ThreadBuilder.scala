@@ -12,15 +12,18 @@ object ThreadBuilder {
   def createWorker(horizontal: Int, vertical: Int, setFigures: Array[ChessShape], chessField: (Int, Int)): Int = {
     if (setFigures.isEmpty) throw new RuntimeException("setFiguresIsEmpty")
     var sortedCollectionFigures = setFigures.sortBy(figure => figure.priority).map(figure => FigureOnField(figure, 1, 1))
+    var freePlaces: mutable.SortedSet[PlaceOnField] = createFreePlaces(chessField)
     var count: Int = 0
     //    new Thread() {
     //      override def run(): Unit = {
     sortedCollectionFigures(0).horizontal = horizontal
     sortedCollectionFigures(0).vertical = vertical
 
-    abcd(sortedCollectionFigures, chessField, 1)
+    freePlaces = minusFreePlaces(freePlaces, sortedCollectionFigures(0))
 
-    def abcd(sortedCollectionFigures: Array[FigureOnField], chessField: (Int, Int), numberFigures: Int): Unit = {
+    worker(sortedCollectionFigures, chessField, 1)
+
+    def worker(sortedCollectionFigures: Array[FigureOnField], chessField: (Int, Int), numberFigures: Int): Unit = {
       for (hor <- sortedCollectionFigures(numberFigures).horizontal to chessField._1) {
         for (vert <- sortedCollectionFigures(numberFigures).vertical to chessField._2) {
           sortedCollectionFigures(numberFigures).horizontal = hor
@@ -33,7 +36,7 @@ object ThreadBuilder {
               sortedCollectionFigures(numberFigures).vertical = vert
               val refactorArray = replacePlaces(sortedCollectionFigures, numberFigures)
 
-              abcd(refactorArray, chessField, numberFigures + 1)
+              worker(refactorArray, chessField, numberFigures + 1)
             }
             if (hor == chessField._1 && vert == chessField._2) {
               if (numberFigures == 1) {
@@ -41,15 +44,15 @@ object ThreadBuilder {
               }
               if(sortedCollectionFigures(numberFigures - 1).horizontal == chessField._1
                 && sortedCollectionFigures(numberFigures - 1).vertical == chessField._2) {
-                abcd(sortedCollectionFigures, chessField, numberFigures - 1)
+                worker(sortedCollectionFigures, chessField, numberFigures - 1)
               }
               if (sortedCollectionFigures(numberFigures - 1).vertical == chessField._2) {
                 sortedCollectionFigures(numberFigures - 1).horizontal = sortedCollectionFigures(numberFigures - 1).horizontal + 1
                 sortedCollectionFigures(numberFigures - 1).vertical = 1
-                abcd(sortedCollectionFigures, chessField, numberFigures - 1)
+                worker(sortedCollectionFigures, chessField, numberFigures - 1)
               } else {
                 sortedCollectionFigures(numberFigures - 1).vertical = sortedCollectionFigures(numberFigures - 1).vertical + 1
-                abcd(sortedCollectionFigures, chessField, numberFigures - 1)
+                worker(sortedCollectionFigures, chessField, numberFigures - 1)
               }
             }
           }
@@ -59,10 +62,10 @@ object ThreadBuilder {
               if (sortedCollectionFigures(numberFigures - 1).vertical == chessField._2) {
                 sortedCollectionFigures(numberFigures - 1).horizontal = sortedCollectionFigures(numberFigures - 1).horizontal + 1
                 sortedCollectionFigures(numberFigures - 1).vertical = 1
-                abcd(sortedCollectionFigures, chessField, numberFigures - 1)
+                worker(sortedCollectionFigures, chessField, numberFigures - 1)
               } else {
                 sortedCollectionFigures(numberFigures - 1).vertical = sortedCollectionFigures(numberFigures - 1).vertical + 1
-                abcd(sortedCollectionFigures, chessField, numberFigures - 1)
+                worker(sortedCollectionFigures, chessField, numberFigures - 1)
               }
             }
             //                sortedCollectionFigures(numberFigures).horizontal = hor
@@ -112,5 +115,34 @@ object ThreadBuilder {
     usedPlaces.foreach(place =>
       if(currentPlace == place) return true)
     false
+  }
+
+  private def createFreePlaces(chessField:(Int, Int)): mutable.SortedSet[PlaceOnField] = {
+    var freePlaces: mutable.SortedSet[PlaceOnField] = mutable.SortedSet[PlaceOnField]()
+    for(hor <- 1 to chessField._1) {
+      for(vert <- 1 to chessField._2) {
+        val placeOnField = PlaceOnField(horizontal = hor, vertical = vert)
+        freePlaces += placeOnField
+      }
+    }
+    freePlaces
+  }
+
+  private def minusFreePlaces(freePlaces: mutable.SortedSet[PlaceOnField], currentFigure: FigureOnField): mutable.SortedSet[PlaceOnField] = {
+    for(place <- freePlaces) {
+      if(currentFigure.figure.brokenField(currentFigure.horizontal, currentFigure.vertical, place.horizontal, place.vertical)) {
+        freePlaces -= place
+      }
+    }
+    freePlaces
+  }
+
+  private def plusFreePlaces(freePlaces: mutable.SortedSet[PlaceOnField], currentFigure: FigureOnField): mutable.SortedSet[PlaceOnField] = {
+    for(place <- freePlaces) {
+      if(!currentFigure.figure.brokenField(currentFigure.horizontal, currentFigure.vertical, place.horizontal, place.vertical)) {
+        freePlaces += place
+      }
+    }
+    freePlaces
   }
 }

@@ -9,7 +9,7 @@ import scala.collection.mutable
 /**
   * Created by Administrator on 2/20/2018.
   */
-object appMaster {
+object AppMaster {
 
   private var shape: ChessShape = _
   private var number: Int = _

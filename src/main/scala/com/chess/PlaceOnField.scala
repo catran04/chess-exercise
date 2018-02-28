@@ -11,5 +11,4 @@ case class PlaceOnField(
                        vertical: Int
                        ) {
 
-  implicit def compare(that: PlaceOnField): Ordering[PlaceOnField] = Ordering.by
 }

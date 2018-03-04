@@ -3,6 +3,7 @@ package com.chess
 import com.chess.figure.{ChessShape, FigureOnField}
 
 import scala.collection.{SortedSet, mutable}
+import scala.util.control.Breaks._
 
 /**
   * Created by Administrator on 2/22/2018.
@@ -22,61 +23,48 @@ object ThreadBuilder {
     freePlaces = minusFreePlaces(freePlaces, sortedCollectionFigures(0))
 
     val freeSquare = freePlaces.headOption
-    if(freePlaces.isEmpty) return 0
+    if(freeSquare.isEmpty) return 0
 
 
     worker(sortedCollectionFigures, freePlaces, 1, true)
 
     def worker(sortedCollectionFigures: Array[FigureOnField], freeSquares: mutable.SortedSet[(Int, Int)], numberFigures: Int, up: Boolean): Unit = {
       val freeSquaresAsArray: Array[(Int, Int)] = freeSquares.toArray
-      for (square <- freeSquaresAsArray) {
-        if(up) {
-          sortedCollectionFigures(numberFigures).horizontal = square._1
-          sortedCollectionFigures(numberFigures).vertical = square._2
-        }
-        if (!isBrokenPlace(sortedCollectionFigures.take(numberFigures), sortedCollectionFigures(numberFigures))) {
-          if (numberFigures + 1 == sortedCollectionFigures.length) {
-            count += 1
-          } else {
-            //            sortedCollectionFigures(numberFigures).horizontal = hor
-            //            sortedCollectionFigures(numberFigures).vertical = vert
-            val refactorArray = replacePlaces(sortedCollectionFigures, numberFigures)
-            val newFreeSquares = minusFreePlaces(freeSquares, sortedCollectionFigures(numberFigures))
-            if(newFreeSquares.isEmpty) {
-              val pair = freeSquaresAsArray(1)
-              worker(refactorArray)
-            }
-            worker(refactorArray, newFreeSquares, numberFigures + 1, true)
+      breakable {
+        for (square <- freeSquaresAsArray) {
+          if (up) {
+            sortedCollectionFigures(numberFigures).horizontal = square._1
+            sortedCollectionFigures(numberFigures).vertical = square._2
           }
-          if (square._1 == freeSquaresAsArray.last) {
-            if (numberFigures == 1) {
-              return
-            }
-            if (sortedCollectionFigures(numberFigures - 1).horizontal == freeSquaresAsArray.last._1
-              && sortedCollectionFigures(numberFigures - 1).vertical == freeSquaresAsArray.last._2) {
-              val newFreeSquares = plusFreePlaces(chessField, sortedCollectionFigures.take(numberFigures - 1))
-              worker(sortedCollectionFigures, newFreeSquares, numberFigures - 1, false)
-            }
-            val newFreeSquares = plusFreePlaces(chessField, sortedCollectionFigures.take(numberFigures - 1))
-            val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 1))
-            sortedCollectionFigures(numberFigures - 1).horizontal = newsquare._1
-            sortedCollectionFigures(numberFigures - 1).vertical = newsquare._2
-            worker(sortedCollectionFigures, newFreeSquares, numberFigures - 1, false)
-          }
-          if (square == freeSquaresAsArray.last) {
+          if (!isBrokenPlace(sortedCollectionFigures.take(numberFigures), sortedCollectionFigures(numberFigures))) {
             if (numberFigures + 1 == sortedCollectionFigures.length) {
-              if (numberFigures == 1) return
-              val newFreeSquares = plusFreePlaces(chessField, sortedCollectionFigures.take(numberFigures - 1))
-              val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 1))
-              sortedCollectionFigures(numberFigures - 1).horizontal = newsquare._1
-              sortedCollectionFigures(numberFigures - 1).vertical = newsquare._2
-              worker(sortedCollectionFigures, newFreeSquares, numberFigures - 1, false)
-
+              count += 1
+            } else {
+              val refactorArray = replacePlaces(sortedCollectionFigures, numberFigures)
+              val newFreeSquares = minusFreePlaces(freeSquares, sortedCollectionFigures(numberFigures))
+              if (newFreeSquares.isEmpty) {
+                break()
+              }
+              worker(refactorArray, newFreeSquares, numberFigures + 1, true)
             }
-            worker(sortedCollectionFigures, freeSquares, numberFigures + 1, true)
+            if (square == freeSquaresAsArray.last) {
+              if (numberFigures + 1 == sortedCollectionFigures.length) {
+                if (numberFigures == 1) return
+                val newFreeSquares = plusFreePlaces(chessField, sortedCollectionFigures.take(numberFigures - 1))
+                val pair = (sortedCollectionFigures(numberFigures - 1).horizontal, sortedCollectionFigures(numberFigures - 1).vertical)
+                if(pair == newFreeSquares.last) {
+                  val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 2))
+                  worker(sortedCollectionFigures, newFreeSquares, numberFigures - 2, false)
+                }
+                val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 1))
+                sortedCollectionFigures(numberFigures - 1).horizontal = newsquare._1
+                sortedCollectionFigures(numberFigures - 1).vertical = newsquare._2
+                worker(sortedCollectionFigures, newFreeSquares, numberFigures - 1, false)
+
+              }
+              worker(sortedCollectionFigures, freeSquares, numberFigures + 1, true)
+            }
           }
-          sortedCollectionFigures(numberFigures).horizontal = 1
-          sortedCollectionFigures(numberFigures).vertical = 1
         }
       }
 
@@ -177,4 +165,6 @@ object ThreadBuilder {
     println(arr(index + 1))
     arr(index + 1)
   }
+
+  private def downToStart(sortedCollectionFigures: Array[FigureOnField])
 }

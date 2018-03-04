@@ -52,9 +52,8 @@ object ThreadBuilder {
                 if (numberFigures == 1) return
                 val newFreeSquares = plusFreePlaces(chessField, sortedCollectionFigures.take(numberFigures - 1))
                 val pair = (sortedCollectionFigures(numberFigures - 1).horizontal, sortedCollectionFigures(numberFigures - 1).vertical)
-                if(pair == newFreeSquares.last) {
-                  val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 2))
-                  worker(sortedCollectionFigures, newFreeSquares, numberFigures - 2, false)
+                if(downToStart(sortedCollectionFigures, newFreeSquares, numberFigures, chessField)) {
+                  return
                 }
                 val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 1))
                 sortedCollectionFigures(numberFigures - 1).horizontal = newsquare._1
@@ -67,22 +66,6 @@ object ThreadBuilder {
           }
         }
       }
-
-      //      }
-      //    }.start()
-//      if(freeSquares.isEmpty) {
-//        return 0
-//      }
-//      val freeSquare = freePlaces.head
-//      sortedCollectionFigures(numberFigures).horizontal = freeSquare._1
-//      sortedCollectionFigures(numberFigures).vertical = freeSquare._2
-//      val newfreePlaces = minusFreePlaces(freePlaces, sortedCollectionFigures(numberFigures))
-//      if(newfreePlaces.isEmpty) {
-//        if (numberFigures + 1 == sortedCollectionFigures.length) {
-//
-//        }
-//      }
-
     }
     count
   }
@@ -166,5 +149,13 @@ object ThreadBuilder {
     arr(index + 1)
   }
 
-  private def downToStart(sortedCollectionFigures: Array[FigureOnField])
+  private def downToStart(sortedCollectionFigures: Array[FigureOnField], freeSquares: SortedSet[(Int, Int)], numberOfFigures: Int, chessBoard: (Int, Int)): Boolean = {
+    if (numberOfFigures == 1) return true
+    val pair = (sortedCollectionFigures(numberOfFigures).horizontal, sortedCollectionFigures(numberOfFigures).vertical)
+    if(freeSquares.last == pair) {
+      val newNumberOfFigures = numberOfFigures - 1
+      val newFreeSquares = plusFreePlaces(chessBoard, sortedCollectionFigures.take(newNumberOfFigures))
+      downToStart(sortedCollectionFigures, newFreeSquares, newNumberOfFigures, chessBoard)
+    }else false
+  }
 }

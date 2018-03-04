@@ -23,50 +23,47 @@ object ThreadBuilder {
     freePlaces = minusFreePlaces(freePlaces, sortedCollectionFigures(0))
 
     val freeSquare = freePlaces.headOption
-    if(freeSquare.isEmpty) return 0
+    if (freeSquare.isEmpty) return 0
 
 
-    worker(sortedCollectionFigures, freePlaces, 1, true)
+    worker(sortedCollectionFigures, freePlaces.head, freePlaces, 1, true)
 
-    def worker(sortedCollectionFigures: Array[FigureOnField], freeSquares: mutable.SortedSet[(Int, Int)], numberFigures: Int, up: Boolean): Unit = {
-      val freeSquaresAsArray: Array[(Int, Int)] = freeSquares.toArray
-      breakable {
-        for (square <- freeSquaresAsArray) {
-          if (up) {
-            sortedCollectionFigures(numberFigures).horizontal = square._1
-            sortedCollectionFigures(numberFigures).vertical = square._2
+    def worker(sortedCollectionFigures: Array[FigureOnField], square: (Int, Int), freeSquares: mutable.SortedSet[(Int, Int)], numberFigures: Int, up: Boolean): Unit = {
+      if (up) {
+        sortedCollectionFigures(numberFigures).horizontal = square._1
+        sortedCollectionFigures(numberFigures).vertical = square._2
+      }
+      if (!isBrokenPlace(sortedCollectionFigures.take(numberFigures), sortedCollectionFigures(numberFigures))) {
+        if (numberFigures + 1 == sortedCollectionFigures.length) {
+          count += 1
+        } else {
+          val refactorArray = replacePlaces(sortedCollectionFigures, numberFigures)
+          val newFreeSquares = minusFreePlaces(freeSquares, sortedCollectionFigures(numberFigures))
+          if (newFreeSquares.isEmpty) {
+            worker(sortedCollectionFigures, getNextSquare(freeSquares, sortedCollectionFigures(numberFigures - 1)), freeSquares, numberFigures - 1, false)
           }
-          if (!isBrokenPlace(sortedCollectionFigures.take(numberFigures), sortedCollectionFigures(numberFigures))) {
-            if (numberFigures + 1 == sortedCollectionFigures.length) {
-              count += 1
-            } else {
-              val refactorArray = replacePlaces(sortedCollectionFigures, numberFigures)
-              val newFreeSquares = minusFreePlaces(freeSquares, sortedCollectionFigures(numberFigures))
-              if (newFreeSquares.isEmpty) {
-                break()
-              }
-              worker(refactorArray, newFreeSquares, numberFigures + 1, true)
+          worker(refactorArray, newFreeSquares, numberFigures + 1, true)
+        }
+        if (square == freeSquares.last) {
+          if (numberFigures + 1 == sortedCollectionFigures.length) {
+            if (numberFigures == 1) return
+            val newFreeSquares = plusFreePlaces(chessField, sortedCollectionFigures.take(numberFigures - 1))
+            val pair = (sortedCollectionFigures(numberFigures - 1).horizontal, sortedCollectionFigures(numberFigures - 1).vertical)
+            if (downToStart(sortedCollectionFigures, newFreeSquares, numberFigures, chessField)) {
+              return
             }
-            if (square == freeSquaresAsArray.last) {
-              if (numberFigures + 1 == sortedCollectionFigures.length) {
-                if (numberFigures == 1) return
-                val newFreeSquares = plusFreePlaces(chessField, sortedCollectionFigures.take(numberFigures - 1))
-                val pair = (sortedCollectionFigures(numberFigures - 1).horizontal, sortedCollectionFigures(numberFigures - 1).vertical)
-                if(downToStart(sortedCollectionFigures, newFreeSquares, numberFigures, chessField)) {
-                  return
-                }
-                val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 1))
-                sortedCollectionFigures(numberFigures - 1).horizontal = newsquare._1
-                sortedCollectionFigures(numberFigures - 1).vertical = newsquare._2
-                worker(sortedCollectionFigures, newFreeSquares, numberFigures - 1, false)
+            val newsquare = getNextSquare(newFreeSquares, sortedCollectionFigures(numberFigures - 1))
+            sortedCollectionFigures(numberFigures - 1).horizontal = newsquare._1
+            sortedCollectionFigures(numberFigures - 1).vertical = newsquare._2
+            worker(sortedCollectionFigures, newFreeSquares, numberFigures - 1, false)
 
-              }
-              worker(sortedCollectionFigures, freeSquares, numberFigures + 1, true)
-            }
           }
+          worker(sortedCollectionFigures, freeSquares, numberFigures + 1, true)
         }
       }
+
     }
+
     count
   }
 
@@ -152,10 +149,10 @@ object ThreadBuilder {
   private def downToStart(sortedCollectionFigures: Array[FigureOnField], freeSquares: SortedSet[(Int, Int)], numberOfFigures: Int, chessBoard: (Int, Int)): Boolean = {
     if (numberOfFigures == 1) return true
     val pair = (sortedCollectionFigures(numberOfFigures).horizontal, sortedCollectionFigures(numberOfFigures).vertical)
-    if(freeSquares.last == pair) {
+    if (freeSquares.last == pair) {
       val newNumberOfFigures = numberOfFigures - 1
       val newFreeSquares = plusFreePlaces(chessBoard, sortedCollectionFigures.take(newNumberOfFigures))
       downToStart(sortedCollectionFigures, newFreeSquares, newNumberOfFigures, chessBoard)
-    }else false
+    } else false
   }
 }
